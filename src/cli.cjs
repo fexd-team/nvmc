@@ -4,6 +4,7 @@ const { readToolchainConfig } = require('./config.cjs');
 const { getDefaultCacheRoot } = require('./cache.cjs');
 const { ensureNode, ensurePnpm } = require('./install.cjs');
 const { ensurePnpmShim, buildToolchainPath } = require('./shims.cjs');
+const packageJson = require('../package.json');
 
 async function runCli(argv, dependencies) {
   const deps = dependencies || {};
@@ -15,6 +16,11 @@ async function runCli(argv, dependencies) {
   const arch = deps.arch || process.arch;
   const env = Object.assign({}, deps.env || process.env);
   const cwd = deps.cwd || process.cwd();
+
+  if (command === '--version' || command === '-v' || command === 'version') {
+    stdout.write(packageJson.version + '\n');
+    return 0;
+  }
 
   if (!command || command === '--help' || command === '-h') {
     stdout.write(usage());
@@ -69,6 +75,7 @@ async function runCli(argv, dependencies) {
     });
 
     if (command === 'node') {
+      stderr.write(formatAppliedVersions({ nodeVersion: config.nodeVersion }) + '\n');
       return spawnAndReturn({
         spawnSync: deps.spawnSync || childProcess.spawnSync,
         command: node.executablePath,
@@ -92,6 +99,11 @@ async function runCli(argv, dependencies) {
       nodePath: node.executablePath,
       pnpmCliPath: pnpm.executablePath
     });
+
+    stderr.write(formatAppliedVersions({
+      nodeVersion: config.nodeVersion,
+      pnpmVersion: config.pnpmVersion
+    }) + '\n');
 
     return spawnAndReturn({
       spawnSync: deps.spawnSync || childProcess.spawnSync,
@@ -146,6 +158,16 @@ function getPathDelimiter(platform) {
   return platform === 'win32' ? ';' : ':';
 }
 
+function formatAppliedVersions(options) {
+  const parts = ['[tc] using', 'node@' + options.nodeVersion];
+
+  if (options.pnpmVersion) {
+    parts.push('pnpm@' + options.pnpmVersion);
+  }
+
+  return parts.join(' ');
+}
+
 function formatError(error) {
   return error && error.message ? error.message : String(error);
 }
@@ -153,6 +175,7 @@ function formatError(error) {
 function usage() {
   return [
     'Usage:',
+    '  tc --version',
     '  tc doctor',
     '  tc node <args...>',
     '  tc pnpm <args...>',
@@ -166,5 +189,6 @@ function usage() {
 
 module.exports = {
   runCli,
-  usage
+  usage,
+  formatAppliedVersions
 };

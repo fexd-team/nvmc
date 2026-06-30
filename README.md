@@ -1,5 +1,7 @@
 # @fexd/toolchain
 
+[![npm version](https://img.shields.io/npm/v/@fexd/toolchain.svg)](https://www.npmjs.com/package/@fexd/toolchain)
+
 `@fexd/toolchain` 是一个面向前端项目的工具链运行器，用于让项目脚本固定使用指定版本的 Node.js 和 pnpm。
 
 它适合这种场景：不同项目依赖不同的 Node.js / pnpm 版本，但开发者希望自己的全局 shell 环境保持不变。通过 `tc` 执行的命令只会在当前子进程中使用项目指定的工具链，不会切换或污染全局 `node` / `pnpm`。
@@ -60,6 +62,7 @@ tc-version-pnpm=9.15.9
 常用命令：
 
 ```bash
+tc --version
 tc doctor
 tc node -v
 tc node scripts/build.js
