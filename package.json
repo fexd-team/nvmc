@@ -1,0 +1,33 @@
+{
+  "name": "@fexd/toolchain",
+  "version": "0.1.0",
+  "description": "Run project scripts with a project-pinned Node.js and pnpm toolchain.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fexd-team/toolchain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fexd-team/toolchain/issues"
+  },
+  "homepage": "https://github.com/fexd-team/toolchain#readme",
+  "bin": {
+    "tc": "bin/tc.cjs",
+    "fexd-toolchain": "bin/tc.cjs"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node test/run-tests.cjs"
+  },
+  "engines": {
+    "node": ">=14.17"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

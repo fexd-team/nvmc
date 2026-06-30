@@ -1,0 +1,61 @@
+const fs = require('fs');
+const path = require('path');
+const { parseNpmrcText } = require('./npmrc.cjs');
+
+function parentOf(directory) {
+  const parent = path.dirname(directory);
+  return parent === directory ? null : parent;
+}
+
+function hasToolchainConfig(npmrcConfig) {
+  return Boolean(npmrcConfig['tc-version-node'] || npmrcConfig['tc-version-pnpm']);
+}
+
+function findProjectRoot(startDirectory) {
+  let current = path.resolve(startDirectory || process.cwd());
+  let nearestPackageRoot = null;
+
+  while (current) {
+    const packageJsonPath = path.join(current, 'package.json');
+    if (!nearestPackageRoot && fs.existsSync(packageJsonPath)) {
+      nearestPackageRoot = current;
+    }
+
+    const npmrcPath = path.join(current, '.npmrc');
+    if (fs.existsSync(npmrcPath)) {
+      const npmrcConfig = parseNpmrcText(fs.readFileSync(npmrcPath, 'utf8'));
+      if (hasToolchainConfig(npmrcConfig)) {
+        return current;
+      }
+    }
+
+    current = parentOf(current);
+  }
+
+  return nearestPackageRoot;
+}
+
+function readToolchainConfig(startDirectory) {
+  const root = findProjectRoot(startDirectory);
+
+  if (!root) {
+    throw new Error('Could not find a package.json or .npmrc from ' + path.resolve(startDirectory || process.cwd()));
+  }
+
+  const npmrcPath = path.join(root, '.npmrc');
+  const npmrcConfig = fs.existsSync(npmrcPath)
+    ? parseNpmrcText(fs.readFileSync(npmrcPath, 'utf8'))
+    : {};
+
+  return {
+    root,
+    nodeVersion: npmrcConfig['tc-version-node'] || '',
+    pnpmVersion: npmrcConfig['tc-version-pnpm'] || '',
+    npmrcPath: fs.existsSync(npmrcPath) ? npmrcPath : null
+  };
+}
+
+module.exports = {
+  findProjectRoot,
+  readToolchainConfig
+};
