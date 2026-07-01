@@ -18,14 +18,24 @@
 
 ## 安装
 
+`tc` 是全局命令。目标项目只需要写 `.npmrc` 和 `package.json` scripts，不要把 `@fexd/toolchain` 加到目标项目的 `dependencies` / `devDependencies`。
+
+如果当前全局 Node.js 版本满足 `>=14.17`，推荐使用 npm 全局安装：
+
 ```bash
-pnpm add -D @fexd/toolchain
+npm install -g @fexd/toolchain
 ```
 
-也可以使用 npm：
+如果当前 Node.js 版本太低，但本机已经安装 Bun，可以使用 Bun 全局安装：
 
 ```bash
-npm install -D @fexd/toolchain
+bun add -g @fexd/toolchain
+```
+
+安装后确认：
+
+```bash
+tc --version
 ```
 
 ## 配置
@@ -141,7 +151,8 @@ TC_NPM_REGISTRY=https://registry.npmjs.org
 
 ## 注意事项
 
-- 启动 `tc` 本身需要本机已有可用的 Node.js。
-- 启动 `tc` 的 Node.js 版本需要满足 `>=14.17`。
+- 通过 npm 安装和启动 `tc` 本身时，本机需要有可用的 Node.js。
+- 通过 npm 启动 `tc` 的 Node.js 版本需要满足 `>=14.17`。
+- `tc` 应作为全局命令使用，不建议作为目标项目的本地依赖。
 - 第一次使用某个 Node.js / pnpm 版本时需要联网下载。
 - 为了让 scripts 跨平台，建议在脚本中写 `pnpm`，不要写死 `pnpm.cmd`。
