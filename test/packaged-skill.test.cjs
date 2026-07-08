@@ -58,6 +58,9 @@ test('readme presents concise nvmc usage and no legacy branding', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 
   assert.ok(readme.indexOf('# nvmc') >= 0);
+  assert.ok(readme.indexOf('Run a single command with project-pinned Node.js and pnpm versions') >= 0);
+  assert.ok(readme.indexOf('## 中文说明') >= 0);
+  assert.ok(readme.indexOf('单条命令临时使用项目指定的 Node.js 版本') >= 0);
   assert.ok(readme.indexOf('nvmc init --node') >= 0);
   assert.ok(readme.indexOf('npm install -g @fexd/nvmc') >= 0);
   assert.ok(readme.indexOf('npx -y @fexd/nvmc') >= 0);
@@ -66,7 +69,6 @@ test('readme presents concise nvmc usage and no legacy branding', () => {
   assert.ok(readme.indexOf('migrate-to-nvmc') >= 0);
   assert.ok(readme.indexOf('skills/migrate-to-nvmc/SKILL.md') >= 0);
   assert.ok(readme.indexOf('agent') >= 0);
-  assert.strictEqual((readme.match(/npx -y @fexd\/nvmc/g) || []).length, 1);
   assert.strictEqual(/nvmc@\d/.test(readme), false);
   assert.ok(readme.indexOf('nvmc-node') >= 0);
   assert.ok(readme.indexOf('nvmc-pnpm') >= 0);

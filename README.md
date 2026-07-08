@@ -2,35 +2,223 @@
 
 [![npm version](https://img.shields.io/npm/v/@fexd/nvmc.svg)](https://www.npmjs.com/package/@fexd/nvmc)
 
-`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它只为被 `nvmc` 包裹的这一句命令临时切换 Node.js 和 pnpm 版本，让同一个项目的 scripts 固定使用 `.npmrc` 里声明的版本，同时不切换当前 shell 的全局 `node` / `pnpm`。
+Run a single command with project-pinned Node.js and pnpm versions, without changing the current shell.
 
-## 特性
+`nvmc` is a small command runner for frontend projects. It reads Node.js and pnpm versions from the project's `.npmrc`, prepares the required runtimes when needed, and applies them only to the command wrapped by `nvmc`.
 
-- 单条命令临时使用项目指定的 Node.js 版本。
-- 单条命令临时使用项目指定的 pnpm 版本。
-- 命令结束后不修改当前 shell 或全局 `node` / `pnpm`。
-- 支持 Windows、macOS 和 Linux。
-- 支持嵌套脚本里的 `pnpm` 继续使用项目指定版本。
-- 自动下载并缓存缺失的 Node.js 和 pnpm CLI。
-- 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store 配置。
+## Features
+
+- Temporarily uses a project-pinned Node.js version for one command.
+- Temporarily uses a project-pinned pnpm version for one command.
+- Keeps the interactive shell and global `node` / `pnpm` unchanged.
+- Works on Windows, macOS, and Linux.
+- Keeps nested `pnpm` calls on the pinned pnpm version.
+- Downloads and caches missing Node.js and pnpm CLI versions automatically.
+- Does not replace pnpm store behavior; existing pnpm store settings still apply.
 
 ## Quick Start
 
-下面的示例统一使用 `nvmc`。可以先全局安装一次：
+The examples below use `nvmc`. Install it globally once:
 
 ```bash
 npm install -g @fexd/nvmc
 ```
 
-也可以不全局安装，把示例里的 `nvmc` 替换成 `npx -y @fexd/nvmc`。
+If global installation is not preferred, replace `nvmc` in the examples with `npx -y @fexd/nvmc`.
 
-先在项目根目录写入版本配置。可以用 `init`：
+Initialize project versions:
 
 ```bash
 nvmc init --node 20.19.5 --pnpm 9.15.9
 ```
 
-也可以直接改 `.npmrc`：
+Or edit `.npmrc` directly:
+
+```properties
+nvmc-node=20.19.5
+nvmc-pnpm=9.15.9
+```
+
+Then prefix commands that need the project Node.js or pnpm version:
+
+```bash
+nvmc node scripts/build.js
+nvmc pnpm install
+nvmc pnpm run build
+```
+
+In `package.json` scripts, rewrite commands the same way. For example, change `pnpm run build` to `nvmc pnpm run build`.
+
+## Agent Migration
+
+The package includes a migration skill for coding agents:
+
+```text
+skills/migrate-to-nvmc/SKILL.md
+```
+
+Ask an agent to use it like this:
+
+```text
+Read the migrate-to-nvmc skill from the nvmc package. Infer the project's Node.js and pnpm versions from evidence, ask me to confirm them, then update .npmrc and package.json scripts to use nvmc.
+```
+
+The skill asks agents to inspect `package.json`, `.npmrc`, `pnpm-lock.yaml`, `.nvmrc`, `.node-version`, and related evidence before editing files.
+
+## Host Runtime
+
+`nvmc` itself supports Node.js 12.17 or newer.
+
+For `npx -y @fexd/nvmc`, the host npm should be 7 or newer. In practice, Node.js 16 or newer is recommended for the host runtime.
+
+If the host still uses npm 6, install `nvmc` globally once and use the shorter command in scripts:
+
+```bash
+npm install -g @fexd/nvmc
+nvmc version
+```
+
+The target Node.js version managed by `nvmc` can be older than the host runtime, as long as that Node.js release exists for the current platform and the project itself can run on it.
+
+## Commands
+
+```bash
+nvmc doctor
+nvmc node -v
+nvmc pnpm -v
+```
+
+`nvmc init` can update one or both versions:
+
+```bash
+nvmc init --node 20.19.5
+nvmc init --pnpm 9.15.9
+```
+
+## Configuration
+
+Configure project versions in `.npmrc`:
+
+```properties
+nvmc-node=20.19.5
+nvmc-pnpm=9.15.9
+```
+
+- `nvmc-node`: Node.js version used by wrapped project commands.
+- `nvmc-pnpm`: pnpm version used by wrapped project commands.
+
+## package.json Scripts
+
+```json
+{
+  "scripts": {
+    "nvmc:versions": "nvmc doctor && npm run nvmc:node && npm run nvmc:pnpm",
+    "nvmc:node": "nvmc node -v",
+    "nvmc:pnpm": "nvmc pnpm -v",
+    "install:deps": "nvmc pnpm install",
+    "build": "nvmc pnpm run build"
+  }
+}
+```
+
+## Nested pnpm Scripts
+
+`nvmc pnpm` prepends a pinned pnpm shim to the child process `PATH`, so nested `pnpm` calls keep using the pnpm version from `.npmrc`.
+
+```json
+{
+  "scripts": {
+    "dev": "nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+  }
+}
+```
+
+For cross-platform scripts, use plain `pnpm` inside nested commands. Do not hard-code `pnpm.cmd`.
+
+## How It Works
+
+When a command runs, `nvmc`:
+
+1. Finds the project root from the current directory.
+2. Reads `nvmc-node` and `nvmc-pnpm` from `.npmrc`.
+3. Checks whether the requested Node.js and pnpm CLI versions already exist in cache.
+4. Downloads and extracts missing versions.
+5. Starts the target command with the pinned Node.js executable.
+6. Injects a temporary `PATH` only for that command and its child processes.
+
+After the command exits, the temporary environment disappears. The current shell's global `node` and `pnpm` versions do not change.
+
+## Cache Directory
+
+Default cache locations:
+
+- Windows: `%LOCALAPPDATA%\nvmc`
+- macOS: `~/Library/Caches/nvmc`
+- Linux: `${XDG_CACHE_HOME:-~/.cache}/nvmc`
+
+Override the cache root with `NVMC_HOME`:
+
+```bash
+NVMC_HOME=/path/to/cache nvmc doctor
+```
+
+The cache stores Node.js distributions, pnpm CLI files, downloaded archives, and small shims. Project dependencies still use pnpm's own store.
+
+## Download Mirrors
+
+Default sources:
+
+- Node.js: `https://nodejs.org/dist`
+- pnpm: `https://registry.npmjs.org`
+
+Mirror environment variables:
+
+```bash
+NVMC_NODE_MIRROR=https://nodejs.org/dist
+NVMC_NPM_REGISTRY=https://registry.npmjs.org
+```
+
+## Roadmap
+
+The current scope is intentionally focused on Node.js project commands:
+
+- Node.js: pinned runtime version.
+- pnpm: pinned package-manager version.
+- npm / yarn: may be considered later as similar Node.js package managers.
+
+`nvmc` does not manage JDK, Android SDK, Python, or other non-Node.js runtimes.
+
+## 中文说明
+
+`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它只为被 `nvmc` 包裹的这一句命令临时指定 Node.js 和 pnpm 版本，命令结束后不会修改当前 shell 或全局 `node` / `pnpm`。
+
+### 特性
+
+- 单条命令临时使用项目指定的 Node.js 版本。
+- 单条命令临时使用项目指定的 pnpm 版本。
+- 当前 shell 和全局 `node` / `pnpm` 不受影响。
+- 支持 Windows、macOS 和 Linux。
+- 嵌套脚本中的 `pnpm` 也会继续使用项目指定版本。
+- 缺失的 Node.js 和 pnpm CLI 会自动下载并缓存。
+- 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store。
+
+### 快速开始
+
+示例统一使用 `nvmc`。可以先全局安装：
+
+```bash
+npm install -g @fexd/nvmc
+```
+
+如果不想全局安装，可以把示例里的 `nvmc` 替换成前文提到的 npx 写法。
+
+先初始化项目版本：
+
+```bash
+nvmc init --node 20.19.5 --pnpm 9.15.9
+```
+
+也可以直接在 `.npmrc` 中配置：
 
 ```properties
 nvmc-node=20.19.5
@@ -47,147 +235,33 @@ nvmc pnpm run build
 
 写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `nvmc pnpm run build`。
 
-## Agent 迁移
+### Agent 迁移
 
-nvmc 包内带有一个迁移 skill：`skills/migrate-to-nvmc/SKILL.md`（name: `migrate-to-nvmc`）。
+nvmc 包内带有迁移 skill：`skills/migrate-to-nvmc/SKILL.md`（name: `migrate-to-nvmc`）。
 
-如果希望让 agent 帮你改现有项目，可以直接这样说：
+可以让 agent 这样使用：
 
 ```text
 请读取 nvmc 包里的 migrate-to-nvmc skill，根据项目证据推断 Node.js 和 pnpm 版本；确认版本后，帮我把 .npmrc 和 package.json scripts 改成 nvmc。
 ```
 
-这个 skill 会引导 agent 先看 `package.json`、`.npmrc`、`pnpm-lock.yaml`、`.nvmrc` 等证据，确认版本后再改文件，并保留无关改动。
+这个 skill 会引导 agent 先检查 `package.json`、`.npmrc`、`pnpm-lock.yaml`、`.nvmrc`、`.node-version` 等证据，确认版本后再改文件。
 
-## 安装与运行
+### 运行环境
 
-如果使用上面的替换方式，宿主 npm 需要 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
+`nvmc` 本体支持 Node.js 12.17 或更新版本。使用 npx 方式时，宿主 npm 建议为 7 或更新版本；实际使用中推荐宿主 Node.js 16 或更新版本。
 
-如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
+如果宿主环境还是 npm 6，可以全局安装一次：
 
 ```bash
 npm install -g @fexd/nvmc
 nvmc version
 ```
 
-然后在 scripts 中直接使用：
+`nvmc` 管理的目标 Node.js 版本可以低于宿主 Node.js，只要该版本存在当前平台的发行包，并且项目本身可以运行。
 
-```bash
-nvmc init --node 20.19.5 --pnpm 9.15.9
-nvmc pnpm install
-nvmc pnpm run build
-```
+### 工作方式
 
-`nvmc` 本体支持 Node.js 12.17 或更新版本。它管理的目标 Node.js 版本可以更低，只要该版本存在对应平台发行包，且项目本身可以运行。
-
-## 常用命令
-
-```bash
-nvmc doctor
-nvmc node -v
-nvmc pnpm -v
-```
-
-`nvmc init` 支持只写其中一个版本：
-
-```bash
-nvmc init --node 20.19.5
-nvmc init --pnpm 9.15.9
-```
-
-## 配置
-
-在项目根目录的 `.npmrc` 中配置：
-
-```properties
-nvmc-node=20.19.5
-nvmc-pnpm=9.15.9
-```
-
-字段说明：
-
-- `nvmc-node`：项目脚本使用的 Node.js 版本。
-- `nvmc-pnpm`：项目脚本使用的 pnpm 版本。
-
-## Scripts 示例
-
-例如：
-
-```json
-{
-  "scripts": {
-    "nvmc:versions": "nvmc doctor && npm run nvmc:node && npm run nvmc:pnpm",
-    "nvmc:node": "nvmc node -v",
-    "nvmc:pnpm": "nvmc pnpm -v",
-    "install:deps": "nvmc pnpm install",
-    "build": "nvmc pnpm run build"
-  }
-}
-```
-
-## 嵌套脚本
-
-`nvmc pnpm` 会在子进程的 `PATH` 前面放入项目指定版本的 pnpm shim。因此内层脚本继续执行 `pnpm` 时，仍会使用 `.npmrc` 中配置的 pnpm 版本。
-
-```json
-{
-  "scripts": {
-    "dev": "nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
-  }
-}
-```
-
-为了让 scripts 跨平台，内层命令写 `pnpm`，不要写死 `pnpm.cmd`。
-
-## 工作方式
-
-执行命令时，`nvmc` 会：
-
-1. 从当前目录向上查找项目根目录。
-2. 读取项目 `.npmrc` 中的 `nvmc-node` 和 `nvmc-pnpm`。
-3. 检查缓存中是否已有对应版本的 Node.js 和 pnpm CLI。
-4. 如果缓存不存在，则自动下载并解压。
-5. 使用指定 Node.js 启动目标命令。
-6. 只为这次命令及其子进程注入临时 `PATH`，让它们优先使用指定 Node.js 和 pnpm。
+执行命令时，`nvmc` 会从当前目录向上查找项目根目录，读取 `.npmrc` 中的 `nvmc-node` 和 `nvmc-pnpm`，确保对应版本存在于缓存中，然后只为本次命令及其子进程注入临时 `PATH`。
 
 命令结束后，临时环境随子进程退出而消失；当前 shell 的全局 `node` / `pnpm` 版本不会变化。
-
-## 缓存目录
-
-默认缓存位置：
-
-- Windows：`%LOCALAPPDATA%\nvmc`
-- macOS：`~/Library/Caches/nvmc`
-- Linux：`${XDG_CACHE_HOME:-~/.cache}/nvmc`
-
-可以通过 `NVMC_HOME` 指定缓存目录：
-
-```bash
-NVMC_HOME=/path/to/cache nvmc doctor
-```
-
-缓存中只保存 Node.js 发行包、pnpm CLI、下载归档和少量 shim。pnpm 安装项目依赖时仍使用 pnpm 自己的 store；你已有的 pnpm store 可以继续复用。
-
-## 下载源
-
-默认下载源：
-
-- Node.js：`https://nodejs.org/dist`
-- pnpm：`https://registry.npmjs.org`
-
-可以通过环境变量配置镜像：
-
-```bash
-NVMC_NODE_MIRROR=https://nodejs.org/dist
-NVMC_NPM_REGISTRY=https://registry.npmjs.org
-```
-
-## Roadmap
-
-当前版本聚焦 Node.js 语义：
-
-- Node.js：按项目固定运行版本。
-- pnpm：按项目固定包管理器版本。
-- npm / yarn：后续可考虑加入同类 Node 包管理器支持。
-
-`nvmc` 不管理 JDK、Android SDK、Python 等非 Node 工具链。
