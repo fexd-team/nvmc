@@ -37,6 +37,10 @@ npx --version
 nvmc version
 ```
 
+Ask whether the rewritten scripts need to run in a dedicated build environment, such as Jenkins, CI runners, Docker build images, or other shared build machines.
+
+If scripts must run in a dedicated build environment and npm major is 7 or newer, prefer `npx -y @fexd/nvmc` in scripts. Do not require a global nvmc install on Jenkins or other build machines unless the user explicitly wants to manage that machine image.
+
 If `nvmc version` works, use `nvmc` in scripts:
 
 ```bash

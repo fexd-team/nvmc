@@ -26,6 +26,11 @@ test('migration skill chooses npx or global nvmc from host npm capability', () =
   assert.ok(skill.indexOf('npm major is 7 or newer') >= 0);
   assert.ok(skill.indexOf('npx -y @fexd/nvmc') >= 0);
   assert.ok(skill.indexOf('npm install -g @fexd/nvmc') >= 0);
+  assert.ok(skill.indexOf('Jenkins') >= 0);
+  assert.ok(skill.indexOf('dedicated build') >= 0);
+  assert.ok(skill.indexOf('Ask whether') >= 0);
+  assert.ok(skill.indexOf('prefer `npx -y @fexd/nvmc`') >= 0);
+  assert.ok(skill.indexOf('Do not require a global nvmc install') >= 0);
   assert.strictEqual(skill.indexOf('npx -y nvmc'), -1);
   assert.strictEqual(skill.indexOf('npm install -g nvmc'), -1);
   assert.strictEqual(/nvmc@\d/.test(skill), false);
