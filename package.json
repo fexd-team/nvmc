@@ -15,6 +15,9 @@
     "tooling",
     "nvm"
   ],
+  "maintainers": [
+    "chenjy"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fexd-team/nvmc.git"

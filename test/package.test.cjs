@@ -13,6 +13,7 @@ test('package metadata publishes @fexd/nvmc with a single nvmc binary', () => {
   assert.strictEqual(pkg.repository.url, 'git+https://github.com/fexd-team/nvmc.git');
   assert.strictEqual(pkg.homepage, 'https://github.com/fexd-team/nvmc#readme');
   assert.strictEqual(pkg.engines.node, '>=12.17');
+  assert.deepStrictEqual(pkg.maintainers, ['chenjy']);
   assert.ok(pkg.files.includes('README.zh-CN.md'));
   assert.ok(pkg.keywords.includes('node-version-manager'));
   assert.ok(pkg.keywords.includes('pnpm'));
