@@ -54,6 +54,9 @@ test('readme presents concise nvmc usage and no legacy branding', () => {
   assert.ok(readme.indexOf('nvmc init --node') >= 0);
   assert.ok(readme.indexOf('npm install -g nvmc') >= 0);
   assert.ok(readme.indexOf('npx -y nvmc') >= 0);
+  assert.ok(readme.indexOf('migrate-to-nvmc') >= 0);
+  assert.ok(readme.indexOf('skills/migrate-to-nvmc/SKILL.md') >= 0);
+  assert.ok(readme.indexOf('agent') >= 0);
   assert.strictEqual((readme.match(/npx -y nvmc/g) || []).length, 1);
   assert.strictEqual(/nvmc@\d/.test(readme), false);
   assert.ok(readme.indexOf('nvmc-node') >= 0);

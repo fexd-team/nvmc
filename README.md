@@ -47,6 +47,18 @@ nvmc pnpm run build
 
 写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `nvmc pnpm run build`。
 
+## Agent 迁移
+
+nvmc 包内带有一个迁移 skill：`skills/migrate-to-nvmc/SKILL.md`（name: `migrate-to-nvmc`）。
+
+如果希望让 agent 帮你改现有项目，可以直接这样说：
+
+```text
+请读取 nvmc 包里的 migrate-to-nvmc skill，根据项目证据推断 Node.js 和 pnpm 版本；确认版本后，帮我把 .npmrc 和 package.json scripts 改成 nvmc。
+```
+
+这个 skill 会引导 agent 先看 `package.json`、`.npmrc`、`pnpm-lock.yaml`、`.nvmrc` 等证据，确认版本后再改文件，并保留无关改动。
+
 ## 安装与运行
 
 如果使用上面的替换方式，宿主 npm 需要 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
