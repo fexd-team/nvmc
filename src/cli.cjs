@@ -1,6 +1,6 @@
 const path = require('path');
 const childProcess = require('child_process');
-const { readToolchainConfig } = require('./config.cjs');
+const { readToolchainConfig, writeToolchainConfig } = require('./config.cjs');
 const { getDefaultCacheRoot } = require('./cache.cjs');
 const { ensureNode, ensurePnpm } = require('./install.cjs');
 const { ensurePnpmShim, buildToolchainPath } = require('./shims.cjs');
@@ -25,6 +25,15 @@ async function runCli(argv, dependencies) {
   if (!command || command === '--help' || command === '-h') {
     stdout.write(usage());
     return 0;
+  }
+
+  if (command === 'init') {
+    return initProject(args, {
+      cwd,
+      stdout,
+      stderr,
+      writeToolchainConfig: deps.writeToolchainConfig || writeToolchainConfig
+    });
   }
 
   if (command !== 'doctor' && command !== 'node' && command !== 'pnpm') {
@@ -119,6 +128,92 @@ async function runCli(argv, dependencies) {
   }
 }
 
+function initProject(args, deps) {
+  const options = parseInitArgs(args);
+
+  if (options.error) {
+    deps.stderr.write(options.error + '\n');
+    return 1;
+  }
+
+  if (!options.nodeVersion && !options.pnpmVersion) {
+    deps.stderr.write('Usage: nvmc init --node <version> --pnpm <version>\n');
+    return 1;
+  }
+
+  let config;
+  try {
+    config = deps.writeToolchainConfig(deps.cwd, {
+      nodeVersion: options.nodeVersion,
+      pnpmVersion: options.pnpmVersion
+    });
+  } catch (error) {
+    deps.stderr.write(formatError(error) + '\n');
+    return 1;
+  }
+
+  deps.stdout.write([
+    'Updated nvmc config',
+    'Project: ' + config.root,
+    'Config: ' + config.npmrcPath,
+    'Node.js: ' + (config.nodeVersion || '(missing nvmc-node)'),
+    'pnpm: ' + (config.pnpmVersion || '(missing nvmc-pnpm)'),
+    ''
+  ].join('\n'));
+
+  return 0;
+}
+
+function parseInitArgs(args) {
+  const options = {
+    nodeVersion: '',
+    pnpmVersion: '',
+    error: ''
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === '--node') {
+      if (isMissingOptionValue(args[index + 1])) {
+        options.error = 'Missing value for --node';
+        return options;
+      }
+
+      options.nodeVersion = args[index + 1] || '';
+      index += 1;
+    } else if (arg.indexOf('--node=') === 0) {
+      options.nodeVersion = arg.slice('--node='.length);
+
+      if (!options.nodeVersion) {
+        options.error = 'Missing value for --node';
+        return options;
+      }
+    } else if (arg === '--pnpm') {
+      if (isMissingOptionValue(args[index + 1])) {
+        options.error = 'Missing value for --pnpm';
+        return options;
+      }
+
+      options.pnpmVersion = args[index + 1] || '';
+      index += 1;
+    } else if (arg.indexOf('--pnpm=') === 0) {
+      options.pnpmVersion = arg.slice('--pnpm='.length);
+
+      if (!options.pnpmVersion) {
+        options.error = 'Missing value for --pnpm';
+        return options;
+      }
+    }
+  }
+
+  return options;
+}
+
+function isMissingOptionValue(value) {
+  return !value || value.indexOf('--') === 0;
+}
+
 function spawnAndReturn(options) {
   const result = options.spawnSync(options.command, options.args, {
     cwd: options.cwd,
@@ -176,6 +271,7 @@ function usage() {
   return [
     'Usage:',
     '  nvmc --version',
+    '  nvmc init --node <version> --pnpm <version>',
     '  nvmc doctor',
     '  nvmc node <args...>',
     '  nvmc pnpm <args...>',
@@ -190,5 +286,6 @@ function usage() {
 module.exports = {
   runCli,
   usage,
+  parseInitArgs,
   formatAppliedVersions
 };

@@ -2,7 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { readToolchainConfig } = require('../src/config.cjs');
+const { readToolchainConfig, writeToolchainConfig } = require('../src/config.cjs');
 
 function tempProject() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nvmc-config-'));
@@ -51,6 +51,36 @@ test('does not read legacy tc-version npmrc keys', () => {
 
     assert.strictEqual(config.nodeVersion, '');
     assert.strictEqual(config.pnpmVersion, '');
+  } finally {
+    project.cleanup();
+  }
+});
+
+test('writes nvmc versions to project npmrc while preserving other npm settings', () => {
+  const project = tempProject();
+
+  try {
+    fs.writeFileSync(path.join(project.root, 'package.json'), '{"name":"demo"}');
+    fs.writeFileSync(path.join(project.root, '.npmrc'), [
+      'registry=https://registry.npmjs.org/',
+      'nvmc-node=18.20.3',
+      ''
+    ].join('\n'));
+
+    const result = writeToolchainConfig(project.root, {
+      nodeVersion: '16.20.2',
+      pnpmVersion: '6.35.1'
+    });
+
+    const text = fs.readFileSync(path.join(project.root, '.npmrc'), 'utf8');
+
+    assert.strictEqual(result.root, project.root);
+    assert.strictEqual(result.nodeVersion, '16.20.2');
+    assert.strictEqual(result.pnpmVersion, '6.35.1');
+    assert.ok(text.indexOf('registry=https://registry.npmjs.org/') >= 0);
+    assert.ok(text.indexOf('nvmc-node=16.20.2') >= 0);
+    assert.ok(text.indexOf('nvmc-pnpm=6.35.1') >= 0);
+    assert.strictEqual(text.indexOf('nvmc-node=18.20.3'), -1);
   } finally {
     project.cleanup();
   }

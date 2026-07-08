@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { parseNpmrcText } = require('./npmrc.cjs');
+const { parseNpmrcText, updateNpmrcText } = require('./npmrc.cjs');
 
 function parentOf(directory) {
   const parent = path.dirname(directory);
@@ -55,7 +55,34 @@ function readToolchainConfig(startDirectory) {
   };
 }
 
+function writeToolchainConfig(startDirectory, options) {
+  const root = findProjectRoot(startDirectory);
+
+  if (!root) {
+    throw new Error('Could not find a package.json or .npmrc from ' + path.resolve(startDirectory || process.cwd()));
+  }
+
+  const npmrcPath = path.join(root, '.npmrc');
+  const currentText = fs.existsSync(npmrcPath)
+    ? fs.readFileSync(npmrcPath, 'utf8')
+    : '';
+  const values = {};
+
+  if (options.nodeVersion) {
+    values['nvmc-node'] = options.nodeVersion;
+  }
+
+  if (options.pnpmVersion) {
+    values['nvmc-pnpm'] = options.pnpmVersion;
+  }
+
+  fs.writeFileSync(npmrcPath, updateNpmrcText(currentText, values), 'utf8');
+
+  return readToolchainConfig(root);
+}
+
 module.exports = {
   findProjectRoot,
-  readToolchainConfig
+  readToolchainConfig,
+  writeToolchainConfig
 };

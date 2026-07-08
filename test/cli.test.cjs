@@ -87,6 +87,59 @@ test('doctor prints the configured versions without spawning commands', async ()
   assert.strictEqual(stderr, '');
 });
 
+test('init writes selected versions without spawning commands', async () => {
+  const spawns = [];
+  let output = '';
+  let written = null;
+  const deps = baseDeps(spawns);
+  deps.stdout = { write: (chunk) => { output += chunk; } };
+  deps.writeToolchainConfig = (cwd, options) => {
+    written = { cwd, options };
+    return {
+      root: cwd,
+      nodeVersion: options.nodeVersion,
+      pnpmVersion: options.pnpmVersion,
+      npmrcPath: cwd + '/.npmrc'
+    };
+  };
+  deps.readToolchainConfig = () => {
+    throw new Error('init should not read project config');
+  };
+
+  const exitCode = await runCli(['init', '--node', '16.20.2', '--pnpm=6.35.1'], deps);
+
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(spawns.length, 0);
+  assert.deepStrictEqual(written, {
+    cwd: '/repo',
+    options: {
+      nodeVersion: '16.20.2',
+      pnpmVersion: '6.35.1'
+    }
+  });
+  assert.ok(output.indexOf('Config: /repo/.npmrc') >= 0);
+  assert.ok(output.indexOf('Node.js: 16.20.2') >= 0);
+  assert.ok(output.indexOf('pnpm: 6.35.1') >= 0);
+});
+
+test('init rejects missing option values', async () => {
+  const spawns = [];
+  let stderr = '';
+  let wrote = false;
+  const deps = baseDeps(spawns);
+  deps.stderr = { write: (chunk) => { stderr += chunk; } };
+  deps.writeToolchainConfig = () => {
+    wrote = true;
+  };
+
+  const exitCode = await runCli(['init', '--node', '--pnpm', '9.15.9'], deps);
+
+  assert.strictEqual(exitCode, 1);
+  assert.strictEqual(spawns.length, 0);
+  assert.strictEqual(wrote, false);
+  assert.ok(stderr.indexOf('Missing value for --node') >= 0);
+});
+
 test('prints the package version without requiring project config', async () => {
   const spawns = [];
   let output = '';

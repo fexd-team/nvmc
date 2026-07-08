@@ -50,10 +50,12 @@ test('readme presents nvmc with npx-first usage and no legacy branding', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 
   assert.ok(readme.indexOf('# nvmc') >= 0);
+  assert.ok(readme.indexOf('nvmc init --node') >= 0);
   assert.ok(readme.indexOf('npx -y nvmc') >= 0);
   assert.strictEqual(/nvmc@\d/.test(readme), false);
   assert.ok(readme.indexOf('nvmc-node') >= 0);
   assert.ok(readme.indexOf('nvmc-pnpm') >= 0);
+  assert.ok(readme.indexOf('nvmc init --node') < readme.indexOf('npx -y nvmc doctor'));
   assert.strictEqual(/@fexd\/toolchain/.test(readme), false);
   assert.strictEqual(/\btc\b/.test(readme), false);
 });

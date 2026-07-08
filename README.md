@@ -14,17 +14,46 @@
 - 自动下载并缓存缺失的 Node.js 和 pnpm CLI。
 - 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store 配置。
 
-## 安装与运行
+## Quick Start
 
-推荐在 scripts 中使用 npx 运行：
+在项目根目录先写入 nvmc 配置：
+
+```bash
+npx -y nvmc init --node 20.19.5 --pnpm 9.15.9
+```
+
+`init` 只会更新项目 `.npmrc`，不会下载 Node.js / pnpm，也不会切换当前 shell 的全局版本。
+
+然后检查配置：
 
 ```bash
 npx -y nvmc doctor
+```
+
+确认无误后运行项目命令：
+
+```bash
 npx -y nvmc pnpm install
 npx -y nvmc pnpm run build
 ```
 
-`npx -y` 需要 npm 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
+如果已经有 `.npmrc`，也可以直接手动写入：
+
+```ini
+nvmc-node=20.19.5
+nvmc-pnpm=9.15.9
+```
+
+`nvmc init` 支持只写其中一个版本：
+
+```bash
+npx -y nvmc init --node 20.19.5
+npx -y nvmc init --pnpm 9.15.9
+```
+
+## 安装与运行
+
+推荐在 scripts 中使用 npx 运行。`npx -y` 需要 npm 7 或更新版本，通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
 
 如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
 
@@ -36,6 +65,7 @@ nvmc version
 然后在 scripts 中直接使用：
 
 ```bash
+nvmc init --node 20.19.5 --pnpm 9.15.9
 nvmc pnpm install
 nvmc pnpm run build
 ```
