@@ -46,13 +46,13 @@ nvmc <command>
 If nvmc is not installed globally and npm major is 7 or newer, use npx in scripts:
 
 ```bash
-npx -y nvmc <command>
+npx -y @fexd/nvmc <command>
 ```
 
 If npm major is older than 7 and Node.js 12.17 or newer is available, install nvmc globally once and use the command directly:
 
 ```bash
-npm install -g nvmc
+npm install -g @fexd/nvmc
 nvmc version
 ```
 

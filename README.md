@@ -1,6 +1,6 @@
 # nvmc
 
-[![npm version](https://img.shields.io/npm/v/nvmc.svg)](https://www.npmjs.com/package/nvmc)
+[![npm version](https://img.shields.io/npm/v/@fexd/nvmc.svg)](https://www.npmjs.com/package/@fexd/nvmc)
 
 `nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它让同一个项目的 scripts 固定使用 `.npmrc` 里声明的 Node.js 和 pnpm 版本，同时不切换当前 shell 的全局 `node` / `pnpm`。
 
@@ -19,10 +19,10 @@
 下面的示例统一使用 `nvmc`。可以先全局安装一次：
 
 ```bash
-npm install -g nvmc
+npm install -g @fexd/nvmc
 ```
 
-也可以不全局安装，把示例里的 `nvmc` 替换成 `npx -y nvmc`。
+也可以不全局安装，把示例里的 `nvmc` 替换成 `npx -y @fexd/nvmc`。
 
 先在项目根目录写入版本配置。可以用 `init`：
 
@@ -66,7 +66,7 @@ nvmc 包内带有一个迁移 skill：`skills/migrate-to-nvmc/SKILL.md`（name: 
 如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
 
 ```bash
-npm install -g nvmc
+npm install -g @fexd/nvmc
 nvmc version
 ```
 
