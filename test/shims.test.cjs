@@ -5,7 +5,7 @@ const path = require('path');
 const { ensurePnpmShim, buildToolchainPath } = require('../src/shims.cjs');
 
 function tempCache() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-shims-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nvmc-shims-'));
   return {
     root,
     cleanup: () => fs.rmSync(root, { recursive: true, force: true })

@@ -5,7 +5,7 @@ const path = require('path');
 const { ensureNode, ensurePnpm, extractArchive } = require('../src/install.cjs');
 
 function tempCache() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-cache-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nvmc-cache-'));
   return {
     root,
     cleanup: () => fs.rmSync(root, { recursive: true, force: true })

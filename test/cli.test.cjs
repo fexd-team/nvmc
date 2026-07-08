@@ -51,7 +51,7 @@ test('runs node commands through the configured Node.js executable', async () =>
   assert.strictEqual(spawns[0].command, '/cache/node/bin/node');
   assert.deepStrictEqual(spawns[0].args, ['-v']);
   assert.strictEqual(spawns[0].options.env.PATH, path.dirname('/cache/node/bin/node') + ':global-bin');
-  assert.strictEqual(stderr, '[tc] using node@20.19.5\n');
+  assert.strictEqual(stderr, '[nvmc] using node@20.19.5\n');
 });
 
 test('runs pnpm commands through the configured Node.js and pnpm CLI', async () => {
@@ -67,7 +67,7 @@ test('runs pnpm commands through the configured Node.js and pnpm CLI', async () 
   assert.strictEqual(spawns[0].command, '/cache/node/bin/node');
   assert.deepStrictEqual(spawns[0].args, ['/cache/pnpm/package/bin/pnpm.cjs', 'init']);
   assert.strictEqual(spawns[0].options.env.PATH, '/cache/shims:' + path.dirname('/cache/node/bin/node') + ':global-bin');
-  assert.strictEqual(stderr, '[tc] using node@20.19.5 pnpm@9.15.9\n');
+  assert.strictEqual(stderr, '[nvmc] using node@20.19.5 pnpm@9.15.9\n');
 });
 
 test('doctor prints the configured versions without spawning commands', async () => {

@@ -1,18 +1,17 @@
 {
-  "name": "@fexd/toolchain",
-  "version": "0.1.3",
-  "description": "Run project scripts with a project-pinned Node.js and pnpm toolchain.",
+  "name": "nvmc",
+  "version": "0.1.0",
+  "description": "Run commands with project-pinned Node.js and pnpm versions.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fexd-team/toolchain.git"
+    "url": "git+https://github.com/fexd-team/nvmc.git"
   },
   "bugs": {
-    "url": "https://github.com/fexd-team/toolchain/issues"
+    "url": "https://github.com/fexd-team/nvmc/issues"
   },
-  "homepage": "https://github.com/fexd-team/toolchain#readme",
+  "homepage": "https://github.com/fexd-team/nvmc#readme",
   "bin": {
-    "tc": "bin/tc.cjs",
-    "fexd-toolchain": "bin/tc.cjs"
+    "nvmc": "bin/nvmc.cjs"
   },
   "files": [
     "bin",
@@ -24,7 +23,7 @@
     "test": "node test/run-tests.cjs"
   },
   "engines": {
-    "node": ">=14.17"
+    "node": ">=12.17"
   },
   "publishConfig": {
     "access": "public"

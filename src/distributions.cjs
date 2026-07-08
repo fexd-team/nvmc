@@ -18,7 +18,7 @@ function getNodeDistribution(options) {
   const version = normalizeNodeVersion(options.version);
   const platform = options.platform || process.platform;
   const arch = mapNodeArch(options.arch || process.arch);
-  const mirror = (options.mirror || process.env.TC_NODE_MIRROR || DEFAULT_NODE_MIRROR).replace(/\/+$/, '');
+  const mirror = (options.mirror || process.env.NVMC_NODE_MIRROR || DEFAULT_NODE_MIRROR).replace(/\/+$/, '');
 
   if (!version) {
     throw new Error('Node.js version is required');
@@ -59,7 +59,7 @@ function getNodeExecutableRelativePath(distribution) {
 
 function getPnpmDistribution(version, registry) {
   const cleanVersion = String(version || '').trim();
-  const cleanRegistry = (registry || process.env.TC_NPM_REGISTRY || DEFAULT_NPM_REGISTRY).replace(/\/+$/, '');
+  const cleanRegistry = (registry || process.env.NVMC_NPM_REGISTRY || DEFAULT_NPM_REGISTRY).replace(/\/+$/, '');
 
   if (!cleanVersion) {
     throw new Error('pnpm version is required');

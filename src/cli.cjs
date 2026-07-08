@@ -44,20 +44,20 @@ async function runCli(argv, dependencies) {
     stdout.write([
       'Project: ' + config.root,
       'Config: ' + (config.npmrcPath || '(missing .npmrc)'),
-      'Node.js: ' + (config.nodeVersion || '(missing tc-version-node)'),
-      'pnpm: ' + (config.pnpmVersion || '(missing tc-version-pnpm)'),
+      'Node.js: ' + (config.nodeVersion || '(missing nvmc-node)'),
+      'pnpm: ' + (config.pnpmVersion || '(missing nvmc-pnpm)'),
       ''
     ].join('\n'));
     return config.nodeVersion && config.pnpmVersion ? 0 : 1;
   }
 
   if (!config.nodeVersion) {
-    stderr.write('Missing tc-version-node in ' + (config.npmrcPath || 'project .npmrc') + '\n');
+    stderr.write('Missing nvmc-node in ' + (config.npmrcPath || 'project .npmrc') + '\n');
     return 1;
   }
 
   if (command === 'pnpm' && !config.pnpmVersion) {
-    stderr.write('Missing tc-version-pnpm in ' + (config.npmrcPath || 'project .npmrc') + '\n');
+    stderr.write('Missing nvmc-pnpm in ' + (config.npmrcPath || 'project .npmrc') + '\n');
     return 1;
   }
 
@@ -159,7 +159,7 @@ function getPathDelimiter(platform) {
 }
 
 function formatAppliedVersions(options) {
-  const parts = ['[tc] using', 'node@' + options.nodeVersion];
+  const parts = ['[nvmc] using', 'node@' + options.nodeVersion];
 
   if (options.pnpmVersion) {
     parts.push('pnpm@' + options.pnpmVersion);
@@ -175,14 +175,14 @@ function formatError(error) {
 function usage() {
   return [
     'Usage:',
-    '  tc --version',
-    '  tc doctor',
-    '  tc node <args...>',
-    '  tc pnpm <args...>',
+    '  nvmc --version',
+    '  nvmc doctor',
+    '  nvmc node <args...>',
+    '  nvmc pnpm <args...>',
     '',
     'Project .npmrc:',
-    '  tc-version-node=20.19.5',
-    '  tc-version-pnpm=9.15.9',
+    '  nvmc-node=20.19.5',
+    '  nvmc-pnpm=9.15.9',
     ''
   ].join('\n');
 }

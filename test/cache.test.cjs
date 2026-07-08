@@ -14,7 +14,7 @@ test('uses LOCALAPPDATA for the default Windows cache root', () => {
     home: 'C:\\Users\\me'
   });
 
-  assert.strictEqual(cacheRoot, path.join('C:\\Users\\me\\AppData\\Local', 'fexd-toolchain'));
+  assert.strictEqual(cacheRoot, path.join('C:\\Users\\me\\AppData\\Local', 'nvmc'));
 });
 
 test('uses Library/Caches for the default macOS cache root', () => {
@@ -24,7 +24,17 @@ test('uses Library/Caches for the default macOS cache root', () => {
     home: '/Users/me'
   });
 
-  assert.strictEqual(cacheRoot, path.join('/Users/me', 'Library', 'Caches', 'fexd-toolchain'));
+  assert.strictEqual(cacheRoot, path.join('/Users/me', 'Library', 'Caches', 'nvmc'));
+});
+
+test('uses NVMC_HOME when provided', () => {
+  const cacheRoot = getDefaultCacheRoot({
+    platform: 'linux',
+    env: { NVMC_HOME: '/custom/nvmc-cache' },
+    home: '/Users/me'
+  });
+
+  assert.strictEqual(cacheRoot, path.resolve('/custom/nvmc-cache'));
 });
 
 test('builds Node.js cache paths without platform-specific shell shims', () => {

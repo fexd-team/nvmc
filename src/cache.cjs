@@ -2,7 +2,7 @@ const os = require('os');
 const path = require('path');
 const { getNodeExecutableRelativePath, getPnpmDistribution } = require('./distributions.cjs');
 
-const CACHE_DIR_NAME = 'fexd-toolchain';
+const CACHE_DIR_NAME = 'nvmc';
 
 function getDefaultCacheRoot(options) {
   const opts = options || {};
@@ -10,8 +10,8 @@ function getDefaultCacheRoot(options) {
   const env = opts.env || process.env;
   const home = opts.home || os.homedir();
 
-  if (env.TC_HOME) {
-    return path.resolve(env.TC_HOME);
+  if (env.NVMC_HOME) {
+    return path.resolve(env.NVMC_HOME);
   }
 
   if (platform === 'win32') {

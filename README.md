@@ -1,112 +1,115 @@
-# @fexd/toolchain
+# nvmc
 
-[![npm version](https://img.shields.io/npm/v/@fexd/toolchain.svg)](https://www.npmjs.com/package/@fexd/toolchain)
+[![npm version](https://img.shields.io/npm/v/nvmc.svg)](https://www.npmjs.com/package/nvmc)
 
-`@fexd/toolchain` 是一个面向前端项目的工具链运行器，用于让项目脚本固定使用指定版本的 Node.js 和 pnpm。
-
-它适合这种场景：不同项目依赖不同的 Node.js / pnpm 版本，但开发者希望自己的全局 shell 环境保持不变。通过 `tc` 执行的命令只会在当前子进程中使用项目指定的工具链，不会切换或污染全局 `node` / `pnpm`。
+`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它让同一个项目的 scripts 固定使用 `.npmrc` 里声明的 Node.js 和 pnpm 版本，同时不切换当前 shell 的全局 `node` / `pnpm`。
 
 ## 特性
 
 - 按项目固定 Node.js 版本。
 - 按项目固定 pnpm 版本。
-- 不依赖 `nvm`、`fnm` 或 Corepack。
-- 不修改当前 shell 的全局 `node` / `pnpm`。
+- scripts 结束后不修改当前 shell。
 - 支持 Windows、macOS 和 Linux。
-- 支持嵌套脚本中的 `pnpm` 命令继续使用项目指定版本。
-- 自动下载并缓存所需的 Node.js 和 pnpm。
+- 支持嵌套脚本里的 `pnpm` 继续使用项目指定版本。
+- 自动下载并缓存缺失的 Node.js 和 pnpm CLI。
+- 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store 配置。
 
-## 安装
+## 安装与运行
 
-`tc` 是全局命令。目标项目只需要写 `.npmrc` 和 `package.json` scripts，不要把 `@fexd/toolchain` 加到目标项目的 `dependencies` / `devDependencies`。
-
-如果当前全局 Node.js 版本满足 `>=14.17`，推荐使用 npm 全局安装：
-
-```bash
-npm install -g @fexd/toolchain
-```
-
-如果当前 Node.js 版本太低，但本机已经安装 Bun，可以使用 Bun 全局安装：
+推荐在 scripts 中使用 npx 运行，并固定 nvmc 版本：
 
 ```bash
-bun add -g @fexd/toolchain
+npx -y nvmc@0.1.0 doctor
+npx -y nvmc@0.1.0 pnpm install
+npx -y nvmc@0.1.0 pnpm run build
 ```
 
-安装后确认：
+`npx -y` 需要 npm 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
+
+如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
 
 ```bash
-tc --version
+npm install -g nvmc@0.1.0
+nvmc version
 ```
+
+然后在 scripts 中直接使用：
+
+```bash
+nvmc pnpm install
+nvmc pnpm run build
+```
+
+`nvmc` 本体支持 Node.js 12.17 或更新版本。它管理的目标 Node.js 版本可以更低，只要该版本存在对应平台发行包，且项目本身可以运行。
 
 ## 配置
 
-在项目根目录的 `.npmrc` 中配置工具链版本：
+在项目根目录的 `.npmrc` 中配置：
 
 ```ini
-tc-version-node=20.19.5
-tc-version-pnpm=9.15.9
+nvmc-node=20.19.5
+nvmc-pnpm=9.15.9
 ```
 
 字段说明：
 
-- `tc-version-node`：项目脚本使用的 Node.js 版本。
-- `tc-version-pnpm`：项目脚本使用的 pnpm 版本。
+- `nvmc-node`：项目脚本使用的 Node.js 版本。
+- `nvmc-pnpm`：项目脚本使用的 pnpm 版本。
 
-## 使用
+## Scripts 示例
 
-在 `package.json` scripts 中通过 `tc` 执行命令：
+新宿主环境推荐：
 
 ```json
 {
   "scripts": {
-    "toolchain:versions": "tc doctor && npm run toolchain:node && npm run toolchain:pnpm",
-    "toolchain:node": "tc node -v",
-    "toolchain:pnpm": "tc pnpm -v",
-    "install:deps": "tc pnpm install",
-    "dev": "tc pnpm dev",
-    "build": "tc pnpm build"
+    "toolchain:versions": "npx -y nvmc@0.1.0 doctor && npm run toolchain:node && npm run toolchain:pnpm",
+    "toolchain:node": "npx -y nvmc@0.1.0 node -v",
+    "toolchain:pnpm": "npx -y nvmc@0.1.0 pnpm -v",
+    "install:deps": "npx -y nvmc@0.1.0 pnpm install",
+    "build": "npx -y nvmc@0.1.0 pnpm run build"
   }
 }
 ```
 
-常用命令：
+老宿主环境推荐：
 
-```bash
-tc --version
-tc doctor
-tc node -v
-tc node scripts/build.js
-tc pnpm -v
-tc pnpm install
-tc pnpm run build
+```json
+{
+  "scripts": {
+    "toolchain:versions": "nvmc doctor && npm run toolchain:node && npm run toolchain:pnpm",
+    "toolchain:node": "nvmc node -v",
+    "toolchain:pnpm": "nvmc pnpm -v",
+    "install:deps": "nvmc pnpm install",
+    "build": "nvmc pnpm run build"
+  }
+}
 ```
 
 ## 嵌套脚本
 
-`tc` 会在子进程的 `PATH` 前面放入项目指定版本的 pnpm shim。因此通过 `tc pnpm` 启动的脚本中，如果继续执行 `pnpm`，仍然会使用 `.npmrc` 中配置的 pnpm 版本。
-
-例如：
+`nvmc pnpm` 会在子进程的 `PATH` 前面放入项目指定版本的 pnpm shim。因此内层脚本继续执行 `pnpm` 时，仍会使用 `.npmrc` 中配置的 pnpm 版本。
 
 ```json
 {
   "scripts": {
-    "dev": "tc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+    "dev": "npx -y nvmc@0.1.0 pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
   }
 }
 ```
 
-上面两个内层 `pnpm` 命令都会使用项目指定的 pnpm 版本。
+为了让 scripts 跨平台，内层命令写 `pnpm`，不要写死 `pnpm.cmd`。
 
 ## 工作方式
 
-执行 `tc` 时会按以下流程运行：
+执行命令时，`nvmc` 会：
 
 1. 从当前目录向上查找项目根目录。
-2. 读取项目 `.npmrc` 中的 `tc-version-node` 和 `tc-version-pnpm`。
-3. 检查本地缓存中是否已有对应版本的 Node.js 和 pnpm。
+2. 读取项目 `.npmrc` 中的 `nvmc-node` 和 `nvmc-pnpm`。
+3. 检查缓存中是否已有对应版本的 Node.js 和 pnpm CLI。
 4. 如果缓存不存在，则自动下载并解压。
 5. 使用指定 Node.js 启动目标命令。
-6. 为目标命令注入临时 `PATH`，确保子进程优先使用指定 Node.js 和 pnpm。
+6. 为目标命令注入临时 `PATH`，让子进程优先使用指定 Node.js 和 pnpm。
 
 命令结束后，当前 shell 的全局 `node` / `pnpm` 版本不会变化。
 
@@ -114,15 +117,17 @@ tc pnpm run build
 
 默认缓存位置：
 
-- Windows：`%LOCALAPPDATA%\fexd-toolchain`
-- macOS：`~/Library/Caches/fexd-toolchain`
-- Linux：`${XDG_CACHE_HOME:-~/.cache}/fexd-toolchain`
+- Windows：`%LOCALAPPDATA%\nvmc`
+- macOS：`~/Library/Caches/nvmc`
+- Linux：`${XDG_CACHE_HOME:-~/.cache}/nvmc`
 
-可以通过 `TC_HOME` 指定缓存目录：
+可以通过 `NVMC_HOME` 指定缓存目录：
 
 ```bash
-TC_HOME=/path/to/toolchain-cache tc doctor
+NVMC_HOME=/path/to/cache nvmc doctor
 ```
+
+缓存中只保存 Node.js 发行包、pnpm CLI、下载归档和少量 shim。pnpm 安装项目依赖时仍使用 pnpm 自己的 store；你已有的 pnpm store 可以继续复用。
 
 ## 下载源
 
@@ -134,25 +139,16 @@ TC_HOME=/path/to/toolchain-cache tc doctor
 可以通过环境变量配置镜像：
 
 ```bash
-TC_NODE_MIRROR=https://nodejs.org/dist
-TC_NPM_REGISTRY=https://registry.npmjs.org
+NVMC_NODE_MIRROR=https://nodejs.org/dist
+NVMC_NPM_REGISTRY=https://registry.npmjs.org
 ```
 
 ## Roadmap
 
-当前版本聚焦于 Node.js 和 pnpm 的项目级版本管理。后续可以继续扩展到更多项目运行所需的外部工具链：
+当前版本聚焦 Node.js 语义：
 
-- JDK：支持通过 `.npmrc` 指定项目需要的 Java 版本，并在执行脚本时注入 `JAVA_HOME`。
-- Android SDK：支持管理 Android platform、build-tools、platform-tools 等 SDK 组件。
-- Android NDK：支持为 native 构建固定 NDK 版本。
-- Python：支持为 `node-gyp`、native addon 等构建场景固定 Python 版本，并注入 `PYTHON` 环境变量。
+- Node.js：按项目固定运行版本。
+- pnpm：按项目固定包管理器版本。
+- npm / yarn：后续可考虑加入同类 Node 包管理器支持。
 
-这些能力会继续遵循当前定位：只管理项目脚本运行所需的外部工具链，不替代包管理器，也不管理已经适合放在 `devDependencies` 中的普通前端依赖。
-
-## 注意事项
-
-- 通过 npm 安装和启动 `tc` 本身时，本机需要有可用的 Node.js。
-- 通过 npm 启动 `tc` 的 Node.js 版本需要满足 `>=14.17`。
-- `tc` 应作为全局命令使用，不建议作为目标项目的本地依赖。
-- 第一次使用某个 Node.js / pnpm 版本时需要联网下载。
-- 为了让 scripts 跨平台，建议在脚本中写 `pnpm`，不要写死 `pnpm.cmd`。
+`nvmc` 不管理 JDK、Android SDK、Python 等非 Node 工具链。

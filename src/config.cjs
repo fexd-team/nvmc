@@ -8,7 +8,7 @@ function parentOf(directory) {
 }
 
 function hasToolchainConfig(npmrcConfig) {
-  return Boolean(npmrcConfig['tc-version-node'] || npmrcConfig['tc-version-pnpm']);
+  return Boolean(npmrcConfig['nvmc-node'] || npmrcConfig['nvmc-pnpm']);
 }
 
 function findProjectRoot(startDirectory) {
@@ -49,8 +49,8 @@ function readToolchainConfig(startDirectory) {
 
   return {
     root,
-    nodeVersion: npmrcConfig['tc-version-node'] || '',
-    pnpmVersion: npmrcConfig['tc-version-pnpm'] || '',
+    nodeVersion: npmrcConfig['nvmc-node'] || '',
+    pnpmVersion: npmrcConfig['nvmc-pnpm'] || '',
     npmrcPath: fs.existsSync(npmrcPath) ? npmrcPath : null
   };
 }

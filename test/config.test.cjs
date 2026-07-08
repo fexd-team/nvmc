@@ -5,7 +5,7 @@ const path = require('path');
 const { readToolchainConfig } = require('../src/config.cjs');
 
 function tempProject() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-config-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nvmc-config-'));
   return {
     root,
     cleanup: () => fs.rmSync(root, { recursive: true, force: true })
@@ -18,8 +18,8 @@ test('reads toolchain versions from the project npmrc when called in a subdirect
   try {
     fs.writeFileSync(path.join(project.root, 'package.json'), '{"name":"demo"}');
     fs.writeFileSync(path.join(project.root, '.npmrc'), [
-      'tc-version-node=20.19.5',
-      'tc-version-pnpm=9.15.9',
+      'nvmc-node=20.19.5',
+      'nvmc-pnpm=9.15.9',
       ''
     ].join('\n'));
 
@@ -31,6 +31,26 @@ test('reads toolchain versions from the project npmrc when called in a subdirect
     assert.strictEqual(config.root, project.root);
     assert.strictEqual(config.nodeVersion, '20.19.5');
     assert.strictEqual(config.pnpmVersion, '9.15.9');
+  } finally {
+    project.cleanup();
+  }
+});
+
+test('does not read legacy tc-version npmrc keys', () => {
+  const project = tempProject();
+
+  try {
+    fs.writeFileSync(path.join(project.root, 'package.json'), '{"name":"demo"}');
+    fs.writeFileSync(path.join(project.root, '.npmrc'), [
+      'tc-version-node=20.19.5',
+      'tc-version-pnpm=9.15.9',
+      ''
+    ].join('\n'));
+
+    const config = readToolchainConfig(project.root);
+
+    assert.strictEqual(config.nodeVersion, '');
+    assert.strictEqual(config.pnpmVersion, '');
   } finally {
     project.cleanup();
   }
