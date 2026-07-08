@@ -16,12 +16,12 @@
 
 ## 安装与运行
 
-推荐在 scripts 中使用 npx 运行，并固定 nvmc 版本：
+推荐在 scripts 中使用 npx 运行：
 
 ```bash
-npx -y nvmc@0.1.0 doctor
-npx -y nvmc@0.1.0 pnpm install
-npx -y nvmc@0.1.0 pnpm run build
+npx -y nvmc doctor
+npx -y nvmc pnpm install
+npx -y nvmc pnpm run build
 ```
 
 `npx -y` 需要 npm 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
@@ -29,7 +29,7 @@ npx -y nvmc@0.1.0 pnpm run build
 如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
 
 ```bash
-npm install -g nvmc@0.1.0
+npm install -g nvmc
 nvmc version
 ```
 
@@ -63,11 +63,11 @@ nvmc-pnpm=9.15.9
 ```json
 {
   "scripts": {
-    "toolchain:versions": "npx -y nvmc@0.1.0 doctor && npm run toolchain:node && npm run toolchain:pnpm",
-    "toolchain:node": "npx -y nvmc@0.1.0 node -v",
-    "toolchain:pnpm": "npx -y nvmc@0.1.0 pnpm -v",
-    "install:deps": "npx -y nvmc@0.1.0 pnpm install",
-    "build": "npx -y nvmc@0.1.0 pnpm run build"
+    "toolchain:versions": "npx -y nvmc doctor && npm run toolchain:node && npm run toolchain:pnpm",
+    "toolchain:node": "npx -y nvmc node -v",
+    "toolchain:pnpm": "npx -y nvmc pnpm -v",
+    "install:deps": "npx -y nvmc pnpm install",
+    "build": "npx -y nvmc pnpm run build"
   }
 }
 ```
@@ -93,7 +93,7 @@ nvmc-pnpm=9.15.9
 ```json
 {
   "scripts": {
-    "dev": "npx -y nvmc@0.1.0 pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+    "dev": "npx -y nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
   }
 }
 ```

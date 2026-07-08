@@ -39,13 +39,13 @@ npx --version
 If npm major is 7 or newer, use npx in scripts:
 
 ```bash
-npx -y nvmc@0.1.0 <command>
+npx -y nvmc <command>
 ```
 
 If npm major is older than 7 and Node.js 12.17 or newer is available, install nvmc globally once and use the command directly:
 
 ```bash
-npm install -g nvmc@0.1.0
+npm install -g nvmc
 nvmc version
 ```
 
@@ -121,7 +121,7 @@ For nested scripts, keep the outer command under nvmc and use plain `pnpm` insid
 
 ```json
 {
-  "dev": "npx -y nvmc@0.1.0 pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+  "dev": "npx -y nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
 }
 ```
 
