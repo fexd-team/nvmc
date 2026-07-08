@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@fexd/nvmc.svg)](https://www.npmjs.com/package/@fexd/nvmc)
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Run a single command with project-pinned Node.js and pnpm versions, without changing the current shell.
 
 `nvmc` is a small command runner for frontend projects. It reads Node.js and pnpm versions from the project's `.npmrc`, prepares the required runtimes when needed, and applies them only to the command wrapped by `nvmc`.
@@ -187,81 +189,3 @@ The current scope is intentionally focused on Node.js project commands:
 - npm / yarn: may be considered later as similar Node.js package managers.
 
 `nvmc` does not manage JDK, Android SDK, Python, or other non-Node.js runtimes.
-
-## 中文说明
-
-`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它只为被 `nvmc` 包裹的这一句命令临时指定 Node.js 和 pnpm 版本，命令结束后不会修改当前 shell 或全局 `node` / `pnpm`。
-
-### 特性
-
-- 单条命令临时使用项目指定的 Node.js 版本。
-- 单条命令临时使用项目指定的 pnpm 版本。
-- 当前 shell 和全局 `node` / `pnpm` 不受影响。
-- 支持 Windows、macOS 和 Linux。
-- 嵌套脚本中的 `pnpm` 也会继续使用项目指定版本。
-- 缺失的 Node.js 和 pnpm CLI 会自动下载并缓存。
-- 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store。
-
-### 快速开始
-
-示例统一使用 `nvmc`。可以先全局安装：
-
-```bash
-npm install -g @fexd/nvmc
-```
-
-如果不想全局安装，可以把示例里的 `nvmc` 替换成前文提到的 npx 写法。
-
-先初始化项目版本：
-
-```bash
-nvmc init --node 20.19.5 --pnpm 9.15.9
-```
-
-也可以直接在 `.npmrc` 中配置：
-
-```properties
-nvmc-node=20.19.5
-nvmc-pnpm=9.15.9
-```
-
-然后在原本需要使用 `node` 或 `pnpm` 的命令前加上 `nvmc`：
-
-```bash
-nvmc node scripts/build.js
-nvmc pnpm install
-nvmc pnpm run build
-```
-
-写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `nvmc pnpm run build`。
-
-### Agent 迁移
-
-nvmc 包内带有迁移 skill：`skills/migrate-to-nvmc/SKILL.md`（name: `migrate-to-nvmc`）。
-
-可以让 agent 这样使用：
-
-```text
-请读取 nvmc 包里的 migrate-to-nvmc skill，根据项目证据推断 Node.js 和 pnpm 版本；确认版本后，帮我把 .npmrc 和 package.json scripts 改成 nvmc。
-```
-
-这个 skill 会引导 agent 先检查 `package.json`、`.npmrc`、`pnpm-lock.yaml`、`.nvmrc`、`.node-version` 等证据，确认版本后再改文件。
-
-### 运行环境
-
-`nvmc` 本体支持 Node.js 12.17 或更新版本。使用 npx 方式时，宿主 npm 建议为 7 或更新版本；实际使用中推荐宿主 Node.js 16 或更新版本。
-
-如果宿主环境还是 npm 6，可以全局安装一次：
-
-```bash
-npm install -g @fexd/nvmc
-nvmc version
-```
-
-`nvmc` 管理的目标 Node.js 版本可以低于宿主 Node.js，只要该版本存在当前平台的发行包，并且项目本身可以运行。
-
-### 工作方式
-
-执行命令时，`nvmc` 会从当前目录向上查找项目根目录，读取 `.npmrc` 中的 `nvmc-node` 和 `nvmc-pnpm`，确保对应版本存在于缓存中，然后只为本次命令及其子进程注入临时 `PATH`。
-
-命令结束后，临时环境随子进程退出而消失；当前 shell 的全局 `node` / `pnpm` 版本不会变化。

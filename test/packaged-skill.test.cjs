@@ -56,11 +56,11 @@ test('migration skill requires evidence-based version inference and confirmation
 
 test('readme presents concise nvmc usage and no legacy branding', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  const readmeZh = fs.readFileSync(path.join(root, 'README.zh-CN.md'), 'utf8');
 
   assert.ok(readme.indexOf('# nvmc') >= 0);
+  assert.ok(readme.indexOf('[简体中文](README.zh-CN.md)') >= 0);
   assert.ok(readme.indexOf('Run a single command with project-pinned Node.js and pnpm versions') >= 0);
-  assert.ok(readme.indexOf('## 中文说明') >= 0);
-  assert.ok(readme.indexOf('单条命令临时使用项目指定的 Node.js 版本') >= 0);
   assert.ok(readme.indexOf('nvmc init --node') >= 0);
   assert.ok(readme.indexOf('npm install -g @fexd/nvmc') >= 0);
   assert.ok(readme.indexOf('npx -y @fexd/nvmc') >= 0);
@@ -76,4 +76,23 @@ test('readme presents concise nvmc usage and no legacy branding', () => {
   assert.strictEqual(/@fexd\/toolchain/.test(readme), false);
   assert.strictEqual(/\btoolchain\b/i.test(readme), false);
   assert.strictEqual(/\btc\b/.test(readme), false);
+
+  assert.ok(readmeZh.indexOf('# nvmc') >= 0);
+  assert.ok(readmeZh.indexOf('[English](README.md)') >= 0);
+  assert.ok(readmeZh.indexOf('为单条命令临时指定项目所需的 Node.js 和 pnpm 版本') >= 0);
+  assert.ok(readmeZh.indexOf('单条命令临时使用项目指定的 Node.js 版本') >= 0);
+  assert.ok(readmeZh.indexOf('nvmc init --node') >= 0);
+  assert.ok(readmeZh.indexOf('npm install -g @fexd/nvmc') >= 0);
+  assert.ok(readmeZh.indexOf('npx -y @fexd/nvmc') >= 0);
+  assert.strictEqual(readmeZh.indexOf('npx -y nvmc'), -1);
+  assert.strictEqual(readmeZh.indexOf('npm install -g nvmc'), -1);
+  assert.ok(readmeZh.indexOf('migrate-to-nvmc') >= 0);
+  assert.ok(readmeZh.indexOf('skills/migrate-to-nvmc/SKILL.md') >= 0);
+  assert.strictEqual(/nvmc@\d/.test(readmeZh), false);
+  assert.ok(readmeZh.indexOf('nvmc-node') >= 0);
+  assert.ok(readmeZh.indexOf('nvmc-pnpm') >= 0);
+  assert.ok(readmeZh.indexOf('nvmc init --node') < readmeZh.indexOf('nvmc pnpm install'));
+  assert.strictEqual(/@fexd\/toolchain/.test(readmeZh), false);
+  assert.strictEqual(/\btoolchain\b/i.test(readmeZh), false);
+  assert.strictEqual(/\btc\b/.test(readmeZh), false);
 });
