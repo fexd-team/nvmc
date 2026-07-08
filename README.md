@@ -2,13 +2,13 @@
 
 [![npm version](https://img.shields.io/npm/v/@fexd/nvmc.svg)](https://www.npmjs.com/package/@fexd/nvmc)
 
-`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它让同一个项目的 scripts 固定使用 `.npmrc` 里声明的 Node.js 和 pnpm 版本，同时不切换当前 shell 的全局 `node` / `pnpm`。
+`nvmc` 是一个面向前端项目脚本的 Node.js / pnpm 版本运行器。它只为被 `nvmc` 包裹的这一句命令临时切换 Node.js 和 pnpm 版本，让同一个项目的 scripts 固定使用 `.npmrc` 里声明的版本，同时不切换当前 shell 的全局 `node` / `pnpm`。
 
 ## 特性
 
-- 按项目固定 Node.js 版本。
-- 按项目固定 pnpm 版本。
-- scripts 结束后不修改当前 shell。
+- 单条命令临时使用项目指定的 Node.js 版本。
+- 单条命令临时使用项目指定的 pnpm 版本。
+- 命令结束后不修改当前 shell 或全局 `node` / `pnpm`。
 - 支持 Windows、macOS 和 Linux。
 - 支持嵌套脚本里的 `pnpm` 继续使用项目指定版本。
 - 自动下载并缓存缺失的 Node.js 和 pnpm CLI。
@@ -148,9 +148,9 @@ nvmc-pnpm=9.15.9
 3. 检查缓存中是否已有对应版本的 Node.js 和 pnpm CLI。
 4. 如果缓存不存在，则自动下载并解压。
 5. 使用指定 Node.js 启动目标命令。
-6. 为目标命令注入临时 `PATH`，让子进程优先使用指定 Node.js 和 pnpm。
+6. 只为这次命令及其子进程注入临时 `PATH`，让它们优先使用指定 Node.js 和 pnpm。
 
-命令结束后，当前 shell 的全局 `node` / `pnpm` 版本不会变化。
+命令结束后，临时环境随子进程退出而消失；当前 shell 的全局 `node` / `pnpm` 版本不会变化。
 
 ## 缓存目录
 
