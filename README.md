@@ -16,40 +16,28 @@
 
 ## Quick Start
 
-在项目根目录先写入 nvmc 配置：
+先在项目根目录写入版本配置。可以用 `init`：
 
 ```bash
 npx -y nvmc init --node 20.19.5 --pnpm 9.15.9
 ```
 
-`init` 只会更新项目 `.npmrc`，不会下载 Node.js / pnpm，也不会切换当前 shell 的全局版本。
+也可以直接改 `.npmrc`：
 
-然后检查配置：
-
-```bash
-npx -y nvmc doctor
-```
-
-确认无误后运行项目命令：
-
-```bash
-npx -y nvmc pnpm install
-npx -y nvmc pnpm run build
-```
-
-如果已经有 `.npmrc`，也可以直接手动写入：
-
-```ini
+```properties
 nvmc-node=20.19.5
 nvmc-pnpm=9.15.9
 ```
 
-`nvmc init` 支持只写其中一个版本：
+然后在原本需要使用 `node` 或 `pnpm` 的命令前加上 `npx -y nvmc`：
 
 ```bash
-npx -y nvmc init --node 20.19.5
-npx -y nvmc init --pnpm 9.15.9
+npx -y nvmc node scripts/build.js
+npx -y nvmc pnpm install
+npx -y nvmc pnpm run build
 ```
+
+写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `npx -y nvmc pnpm run build`。
 
 ## 安装与运行
 
@@ -72,11 +60,26 @@ nvmc pnpm run build
 
 `nvmc` 本体支持 Node.js 12.17 或更新版本。它管理的目标 Node.js 版本可以更低，只要该版本存在对应平台发行包，且项目本身可以运行。
 
+## 常用命令
+
+```bash
+npx -y nvmc doctor
+npx -y nvmc node -v
+npx -y nvmc pnpm -v
+```
+
+`nvmc init` 支持只写其中一个版本：
+
+```bash
+npx -y nvmc init --node 20.19.5
+npx -y nvmc init --pnpm 9.15.9
+```
+
 ## 配置
 
 在项目根目录的 `.npmrc` 中配置：
 
-```ini
+```properties
 nvmc-node=20.19.5
 nvmc-pnpm=9.15.9
 ```
