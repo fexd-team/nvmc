@@ -1,7 +1,7 @@
 {
   "name": "@fexd/nvmc",
   "version": "0.1.0",
-  "description": "Run commands with project-pinned Node.js and pnpm versions.",
+  "description": "为单条命令临时指定 Node.js 和 pnpm 版本的工具",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fexd-team/nvmc.git"
