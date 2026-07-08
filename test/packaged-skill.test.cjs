@@ -30,6 +30,7 @@ test('migration skill chooses npx or global nvmc from host npm capability', () =
   assert.ok(skill.indexOf('nvmc version') >= 0);
   assert.ok(skill.indexOf('Node.js 12.17') >= 0);
   assert.strictEqual(/@fexd\/toolchain/.test(skill), false);
+  assert.strictEqual(/\btoolchain\b/i.test(skill), false);
   assert.strictEqual(/\btc\b/.test(skill), false);
 });
 
@@ -46,17 +47,19 @@ test('migration skill requires evidence-based version inference and confirmation
   assert.strictEqual(skill.indexOf('nvmc-pnpm=9.15.9'), -1);
 });
 
-test('readme presents nvmc with npx-first usage and no legacy branding', () => {
+test('readme presents concise nvmc usage and no legacy branding', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 
   assert.ok(readme.indexOf('# nvmc') >= 0);
   assert.ok(readme.indexOf('nvmc init --node') >= 0);
+  assert.ok(readme.indexOf('npm install -g nvmc') >= 0);
   assert.ok(readme.indexOf('npx -y nvmc') >= 0);
+  assert.strictEqual((readme.match(/npx -y nvmc/g) || []).length, 1);
   assert.strictEqual(/nvmc@\d/.test(readme), false);
   assert.ok(readme.indexOf('nvmc-node') >= 0);
   assert.ok(readme.indexOf('nvmc-pnpm') >= 0);
-  assert.ok(readme.indexOf('nvmc init --node') < readme.indexOf('npx -y nvmc pnpm install'));
-  assert.ok(readme.indexOf('npx -y nvmc pnpm install') < readme.indexOf('npx -y nvmc doctor'));
+  assert.ok(readme.indexOf('nvmc init --node') < readme.indexOf('nvmc pnpm install'));
   assert.strictEqual(/@fexd\/toolchain/.test(readme), false);
+  assert.strictEqual(/\btoolchain\b/i.test(readme), false);
   assert.strictEqual(/\btc\b/.test(readme), false);
 });

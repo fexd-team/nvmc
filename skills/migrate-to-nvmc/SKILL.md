@@ -28,15 +28,22 @@ Do not revert unrelated dirty files. If a dirty file must be edited, inspect it 
 
 ## Choose Script Prefix
 
-Before modifying `package.json`, check the host runtime:
+Before modifying `package.json`, check the host runtime and whether nvmc is already available:
 
 ```bash
 node -v
 npm -v
 npx --version
+nvmc version
 ```
 
-If npm major is 7 or newer, use npx in scripts:
+If `nvmc version` works, use `nvmc` in scripts:
+
+```bash
+nvmc <command>
+```
+
+If nvmc is not installed globally and npm major is 7 or newer, use npx in scripts:
 
 ```bash
 npx -y nvmc <command>
@@ -121,7 +128,7 @@ For nested scripts, keep the outer command under nvmc and use plain `pnpm` insid
 
 ```json
 {
-  "dev": "npx -y nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+  "dev": "nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
 }
 ```
 
@@ -148,7 +155,7 @@ After migration, run the smallest checks that prove the scripts use nvmc correct
 
 ```bash
 nvmc version
-npm run toolchain:versions
+npm run nvmc:versions
 ```
 
 Run one lightweight real project script, such as a small build or package build.

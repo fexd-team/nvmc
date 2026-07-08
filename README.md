@@ -16,10 +16,18 @@
 
 ## Quick Start
 
+下面的示例统一使用 `nvmc`。可以先全局安装一次：
+
+```bash
+npm install -g nvmc
+```
+
+也可以不全局安装，把示例里的 `nvmc` 替换成 `npx -y nvmc`。
+
 先在项目根目录写入版本配置。可以用 `init`：
 
 ```bash
-npx -y nvmc init --node 20.19.5 --pnpm 9.15.9
+nvmc init --node 20.19.5 --pnpm 9.15.9
 ```
 
 也可以直接改 `.npmrc`：
@@ -29,19 +37,19 @@ nvmc-node=20.19.5
 nvmc-pnpm=9.15.9
 ```
 
-然后在原本需要使用 `node` 或 `pnpm` 的命令前加上 `npx -y nvmc`：
+然后在原本需要使用 `node` 或 `pnpm` 的命令前加上 `nvmc`：
 
 ```bash
-npx -y nvmc node scripts/build.js
-npx -y nvmc pnpm install
-npx -y nvmc pnpm run build
+nvmc node scripts/build.js
+nvmc pnpm install
+nvmc pnpm run build
 ```
 
-写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `npx -y nvmc pnpm run build`。
+写进 `package.json` scripts 时也一样，例如把 `pnpm run build` 改成 `nvmc pnpm run build`。
 
 ## 安装与运行
 
-推荐在 scripts 中使用 npx 运行。`npx -y` 需要 npm 7 或更新版本，通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
+如果使用上面的替换方式，宿主 npm 需要 7 或更新版本。通常这意味着宿主 Node.js 需要 15 或更新版本，推荐使用 Node.js 16 或更新版本。
 
 如果宿主环境仍是 npm 6，例如常见的 Node.js 12 / 14 构建机，可以全局安装一次：
 
@@ -63,16 +71,16 @@ nvmc pnpm run build
 ## 常用命令
 
 ```bash
-npx -y nvmc doctor
-npx -y nvmc node -v
-npx -y nvmc pnpm -v
+nvmc doctor
+nvmc node -v
+nvmc pnpm -v
 ```
 
 `nvmc init` 支持只写其中一个版本：
 
 ```bash
-npx -y nvmc init --node 20.19.5
-npx -y nvmc init --pnpm 9.15.9
+nvmc init --node 20.19.5
+nvmc init --pnpm 9.15.9
 ```
 
 ## 配置
@@ -91,28 +99,14 @@ nvmc-pnpm=9.15.9
 
 ## Scripts 示例
 
-新宿主环境推荐：
+例如：
 
 ```json
 {
   "scripts": {
-    "toolchain:versions": "npx -y nvmc doctor && npm run toolchain:node && npm run toolchain:pnpm",
-    "toolchain:node": "npx -y nvmc node -v",
-    "toolchain:pnpm": "npx -y nvmc pnpm -v",
-    "install:deps": "npx -y nvmc pnpm install",
-    "build": "npx -y nvmc pnpm run build"
-  }
-}
-```
-
-老宿主环境推荐：
-
-```json
-{
-  "scripts": {
-    "toolchain:versions": "nvmc doctor && npm run toolchain:node && npm run toolchain:pnpm",
-    "toolchain:node": "nvmc node -v",
-    "toolchain:pnpm": "nvmc pnpm -v",
+    "nvmc:versions": "nvmc doctor && npm run nvmc:node && npm run nvmc:pnpm",
+    "nvmc:node": "nvmc node -v",
+    "nvmc:pnpm": "nvmc pnpm -v",
     "install:deps": "nvmc pnpm install",
     "build": "nvmc pnpm run build"
   }
@@ -126,7 +120,7 @@ nvmc-pnpm=9.15.9
 ```json
 {
   "scripts": {
-    "dev": "npx -y nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
+    "dev": "nvmc pnpm exec concurrently \"pnpm --filter @app/web dev\" \"pnpm --filter @app/server dev\""
   }
 }
 ```
