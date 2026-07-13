@@ -1,6 +1,6 @@
 {
   "name": "@fexd/nvmc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A tool to temporarily specify Node.js and pnpm versions for a single command.",
   "keywords": [
     "node",

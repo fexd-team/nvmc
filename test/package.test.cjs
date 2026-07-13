@@ -8,7 +8,7 @@ test('package metadata publishes @fexd/nvmc with a single nvmc binary', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
   assert.strictEqual(pkg.name, '@fexd/nvmc');
-  assert.strictEqual(pkg.version, '0.1.0');
+  assert.strictEqual(pkg.version, '0.1.1');
   assert.deepStrictEqual(pkg.bin, { nvmc: 'bin/nvmc.cjs' });
   assert.strictEqual(pkg.repository.url, 'git+https://github.com/fexd-team/nvmc.git');
   assert.strictEqual(pkg.homepage, 'https://github.com/fexd-team/nvmc#readme');

@@ -16,6 +16,7 @@ Run a single command with project-pinned Node.js and pnpm versions, without chan
 - Works on Windows, macOS, and Linux.
 - Keeps nested `pnpm` calls on the pinned pnpm version.
 - Downloads and caches missing Node.js and pnpm CLI versions automatically.
+- Uses atomic cache installs to tolerate interrupted downloads and concurrent CI jobs.
 - Does not replace pnpm store behavior; existing pnpm store settings still apply.
 
 ## Quick Start

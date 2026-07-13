@@ -16,6 +16,7 @@
 - 支持 Windows、macOS 和 Linux。
 - 嵌套脚本中的 `pnpm` 也会继续使用项目指定版本。
 - 缺失的 Node.js 和 pnpm CLI 会自动下载并缓存。
+- 使用原子缓存安装，能更好应对下载中断和 CI 并发任务。
 - 不接管 pnpm store，项目依赖仍复用 pnpm 自己的 store。
 
 ## 快速开始
